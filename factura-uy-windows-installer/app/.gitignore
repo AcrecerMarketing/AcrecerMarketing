@@ -1,0 +1,9 @@
+node_modules/
+*.db
+*.db-wal
+*.db-shm
+backend/.env
+backend/uploads/
+backend/pdfs/
+dist/
+.DS_Store
