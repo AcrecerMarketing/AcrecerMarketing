@@ -1,6 +1,5 @@
 @echo off
-chcp 65001 >nul
-title Factura-UY — Detener
+title Factura-UY - Detener
 
 echo Deteniendo Factura-UY...
 
@@ -11,9 +10,9 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3001 2^>nul') do (
 )
 
 if %encontrado%==1 (
-    echo ✓ Servidor detenido.
+    echo Servidor detenido.
 ) else (
-    echo · El servidor no estaba corriendo.
+    echo El servidor no estaba corriendo.
 )
 
 timeout /t 2 /nobreak >nul

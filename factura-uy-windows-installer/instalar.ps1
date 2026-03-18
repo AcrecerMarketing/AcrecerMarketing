@@ -182,34 +182,28 @@ Write-Step "6/6" "Creando accesos directos..."
 # Script de inicio
 $iniciarScript = @"
 @echo off
-chcp 65001 >nul
 title Factura-UY
-cd /d "$AppDir"
 
-echo Iniciando Factura-UY...
-echo.
+:: Detener instancia anterior
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3001 2^>nul') do (
+    taskkill /PID %%a /F >nul 2>&1
+)
 
-:: Iniciar backend en segundo plano
 start "Factura-UY Backend" /min cmd /c "cd /d "$AppDir\backend" && node server.js"
-
-:: Esperar a que el backend esté listo
-timeout /t 3 /nobreak >nul
-
-:: Abrir el navegador
+timeout /t 4 /nobreak >nul
 start "" "http://localhost:3001"
 
-echo Factura-UY está corriendo en http://localhost:3001
-echo Para detener el servidor, cierra las ventanas de comando o ejecuta detener.bat
+echo Factura-UY corriendo en http://localhost:3001
+echo Contrasena: factura2024
 echo.
 pause
 "@
 
 $detenerScript = @"
 @echo off
-chcp 65001 >nul
-title Factura-UY — Detener
+title Factura-UY - Detener
 echo Deteniendo Factura-UY...
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3001') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3001 2^>nul') do (
     taskkill /PID %%a /F >nul 2>&1
 )
 echo Servidor detenido.
@@ -244,23 +238,20 @@ $sc3.WorkingDirectory = $AppDir
 $sc3.Save()
 Write-OK "Accesos directos en Menú Inicio creados."
 
-# Script de desinstalación
+# Script de desinstalacion
 $desinstalarScript = @"
 @echo off
-chcp 65001 >nul
-echo ¿Estás seguro de que querés desinstalar Factura-UY?
-echo Se eliminarán todos los archivos pero NO la base de datos.
-set /p confirm=Escribí SI para confirmar:
+echo Desinstalar Factura-UY
+echo Se eliminaran todos los archivos pero NO la base de datos.
+set /p confirm=Escribe SI para confirmar:
 if /i "%confirm%"=="SI" (
-    :: Detener servidor si corre
-    for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3001') do taskkill /PID %%a /F >nul 2>&1
-    :: Eliminar carpeta de instalación (excepto la BD)
+    for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3001 2^>nul') do taskkill /PID %%a /F >nul 2>&1
     if exist "$AppDir\factura-uy.db" copy "$AppDir\factura-uy.db" "%USERPROFILE%\Desktop\factura-uy-backup.db" >nul
     rmdir /s /q "$AppDir"
     del "%USERPROFILE%\Desktop\Factura-UY.lnk" >nul 2>&1
     rmdir /s /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Factura-UY" >nul 2>&1
     echo.
-    echo Factura-UY desinstalado. La base de datos fue copiada al escritorio como factura-uy-backup.db
+    echo Factura-UY desinstalado. Base de datos copiada al escritorio.
 )
 pause
 "@
