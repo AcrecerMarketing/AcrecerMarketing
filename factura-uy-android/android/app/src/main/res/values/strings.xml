@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Factura-UY</string>
+    <string name="title_activity_main">Factura-UY</string>
+    <string name="package_name">uy.factura.app</string>
+    <string name="custom_url_scheme">uy.factura.app</string>
+</resources>

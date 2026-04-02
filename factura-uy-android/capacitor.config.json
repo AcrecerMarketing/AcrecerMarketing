@@ -1,0 +1,18 @@
+{
+  "appId": "uy.factura.app",
+  "appName": "Factura-UY",
+  "webDir": "../factura-uy-windows-installer/app/frontend/dist",
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "NodeJS": {
+      "nodeDir": "nodejs-project"
+    }
+  }
+}
