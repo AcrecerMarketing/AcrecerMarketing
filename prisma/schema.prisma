@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no native enum support, so Role / CustomerType / SubscriptionStatus /
+// BillingPeriod are plain strings constrained by the TS union types in src/lib/types.ts.
+// Swapping `provider` to "postgresql" would let these become real Prisma enums again.
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("CLIENT")
+  customerType String   @default("INFLUENCER")
+  onboarded    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accounts       SocialAccount[]
+  subscriptions  Subscription[]
+  supportTickets SupportMessage[]
+}
+
+model SocialAccount {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform         String   @default("instagram")
+  handle           String
+  niche            String?
+  followersStart   Int      @default(0)
+  followersCurrent Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  targeting     TargetingConfig?
+  growthMetrics GrowthMetric[]
+}
+
+model TargetingConfig {
+  id                 String        @id @default(cuid())
+  accountId          String        @unique
+  account            SocialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  hashtags           String        @default("")
+  locations          String        @default("")
+  competitorAccounts String        @default("")
+  genderTarget       String        @default("all")
+  ageMin             Int           @default(18)
+  ageMax             Int           @default(65)
+  updatedAt          DateTime      @updatedAt
+}
+
+model GrowthMetric {
+  id             String        @id @default(cuid())
+  accountId      String
+  account        SocialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  date           DateTime
+  followers      Int
+  newFollowers   Int           @default(0)
+  engagementRate Float         @default(0)
+  profileVisits  Int           @default(0)
+  likes          Int           @default(0)
+  comments       Int           @default(0)
+
+  @@index([accountId, date])
+}
+
+model Plan {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  tagline       String
+  price         Float
+  billingPeriod String   @default("MONTHLY")
+  audience      String   @default("INFLUENCER")
+  featured      Boolean  @default(false)
+  features      String
+  sortOrder     Int      @default(0)
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId      String
+  plan        Plan      @relation(fields: [planId], references: [id])
+  status      String    @default("TRIALING")
+  startDate   DateTime  @default(now())
+  renewalDate DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model SupportMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject   String
+  message   String
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+}
+
+model ContactLead {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  company   String?
+  message   String
+  createdAt DateTime @default(now())
+}
